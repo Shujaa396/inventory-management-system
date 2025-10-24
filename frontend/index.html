@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>InventoryHub</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>InventoryHub</h1>
+
+    <ul id="inventory-list"></ul>
+
+    <div class="form-container">
+        <input type="text" id="item-name" placeholder="Name">
+        <input type="number" id="item-qty" placeholder="Quantity">
+        <input type="number" id="item-price" placeholder="Price">
+        <button onclick="addItem()">Add Item</button>
+    </div>
+
+    <script>
+        async function fetchInventory() {
+            const res = await fetch('http://localhost:5000/api/inventory');
+            const data = await res.json();
+            const list = document.getElementById('inventory-list');
+            list.innerHTML = '';
+            data.data.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.name} - ${item.quantity} pcs - $${item.price}`;
+                list.appendChild(li);
+            });
+        }
+
+        async function addItem() {
+            const name = document.getElementById('item-name').value;
+            const quantity = Number(document.getElementById('item-qty').value);
+            const price = Number(document.getElementById('item-price').value);
+
+            if (!name || !quantity || !price) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            await fetch('http://localhost:5000/api/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: Date.now(), name, quantity, price })
+            });
+
+            fetchInventory();
+
+            document.getElementById('item-name').value = '';
+            document.getElementById('item-qty').value = '';
+            document.getElementById('item-price').value = '';
+        }
+
+        fetchInventory();
+    </script>
+</body>
+</html>
